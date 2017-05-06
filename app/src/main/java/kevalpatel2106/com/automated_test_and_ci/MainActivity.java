@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (!validateEmail(emailEt.getText().toString()))
-                    Toast.makeText(MainActivity.this, "Enter valid email address.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Enter a valid email address.", Toast.LENGTH_LONG).show();
             }
         });
     }
