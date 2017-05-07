@@ -1,3 +1,8 @@
+#Continuous Integration (CI) is a development practice that requires developers to integrate code into a shared repository several times a day.
+#Each check-in is then verified by an automated build, allowing teams to detect problems early
+
+#Add above lines at the starting of the file.
+#This basically tells Travis that this repository is an android application source code and it has to use Java 8 for compilation. The notification section will provide email notifications on the email you provided whenever a build gets completed successfully or fails due to some error.
 language: android
 jdk: oraclejdk8
 sudo: false
@@ -6,6 +11,9 @@ notifications:
     email:
         - kalpesh.appexperts2@gmail.com
 
+#Next, add above lines to your .travis.yml file. The line under the matrix section defines the Android API version and the processor architecture,
+#on which the code will be tested. These lines re-executes the script for each variable. So if I write another line with: “– ANDROID_TARGET=android-16 ANDROID_ABI=armeabi-v7a”, it will execute the whole script with the 21, 19 and 16 APIs. We can say it is really useful to test different API levels.
+# So, each commit you push to the repository will start two separate builds and test prepossess. You can see this in Travis dashboard like below.
 env:
     matrix:
         - ANDROID_TARGET=android-19 ANDROID_ABI=armeabi-v7a
@@ -13,6 +21,9 @@ env:
     global:
         - ADB_INSTALL_TIMEOUT=10    #Time out to 10 mins
 
+#Travis can cache directories that you need to speed up the subsequent builds by caching the Gradle dependency folders.
+#To enable the caching, you have to specify which directories you want to cache under the cache section.
+#Here, I am caching some of the .gradle folders.
 before_cache:
     - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
@@ -44,6 +55,8 @@ licenses:
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
 
+#In every project, we need to run the instrumentation tests. So we will run the emulator using “emulator -avd test -no-skin -no-audio -no-window &”. “ android-wait-for-emulator” script will wait until emulator is up and running. This will print “Waiting for emulator” in Travis log until emulator starts.
+#The next two lines are printing the available devices for our information and sending the key “menu” to the emulator to unlock it.
 before_script:
     - chmod +x gradlew      #Grand permissions
     - android list targets
@@ -58,4 +71,10 @@ script:
     - adb shell input keyevent 82 &
     - ./gradlew connectedCheck coveralls -PdisablePreDex --stacktrace
 
+
+before_install:
+    - pip install --user codecov    #Install codecov
+
+after_success:
+    - codecov                       #Run codecov
 after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"
